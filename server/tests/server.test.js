@@ -5,7 +5,7 @@ const {app} = require('./../server');
 const {Todo} = require('./../models/todo');
 
 beforeEach(done => {
-  Todo.remove({}).then(() => done())
+  Todo.remove({}).then(() => done());
 });
 
 describe('POST /todos', () => {
@@ -25,7 +25,7 @@ describe('POST /todos', () => {
           expect(todos.length).toBe(1);
           expect(todos[0].text).toBe(text);
           done();
-        }).catch(e => dsone(e));
+        }).catch(e => done(e));
     });
   });
 
