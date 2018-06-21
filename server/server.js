@@ -6,7 +6,7 @@ var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {user} = require('./models/user');
 
-var app = express();
+const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 app.post('/todos', (req, res) => {
   console.log(req.body);
 
-  var todo = new Todo({
+  const todo = new Todo({
     text: req.body.text
   });
 
@@ -34,7 +34,7 @@ app.get('/todos', (req, res) => {
 
 // GET /todos/1234324
 app.get('/todos/:id', (req, res) => {
-  var id = req.params.id;
+  const id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
   Todo.findById(id).then(todo => {
     if (!todo) return res.status(404).send();
@@ -43,11 +43,11 @@ app.get('/todos/:id', (req, res) => {
 });
 
 app.delete('/todos/:id', (req, res) => {
-  var id = req.params.id;
+  const id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
 
   Todo.findByIdAndRemove(id).then(todo => {
-    if (!todo) return res.status(404);
+    if (!todo) return res.status(404).send();
     res.send({todo});
   }).catch(e => res.status(400).send());
 });
