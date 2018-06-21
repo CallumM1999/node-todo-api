@@ -42,6 +42,6 @@ app.get('/todos/:id', (req, res) => {
   }).catch(e => res.status(400).send());
 });
 
-app.listen(post, () => console.log(`Started on port ${port}`));
+app.listen(port, () => console.log(`Started on port ${port}`));
 
 module.exports = {app};
