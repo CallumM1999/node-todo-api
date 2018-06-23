@@ -45,7 +45,6 @@ describe('POST /todos', () => {
       });
   });
 });
-
 describe('GET /todos', () => {
   it('should get al todos', done => {
     request(app)
@@ -55,7 +54,6 @@ describe('GET /todos', () => {
       .end(done);
   });
 });
-
 describe('GET /todos/:id', () => {
   it('should return todo doc', done => {
     request(app)
@@ -81,7 +79,6 @@ describe('GET /todos/:id', () => {
       .end(done);
   });
 });
-
 describe('DELETE /todos/:id', () => {
   it('should remove a todo', done => {
     const hexID = todos[1]._id.toHexString();
@@ -117,7 +114,6 @@ describe('DELETE /todos/:id', () => {
       .end(done);
   });
 });
-
 describe('PATCH /todos/:id', () => {
   it('should update the todo', done => {
     const firstID = todos[0]._id.toHexString();
@@ -163,7 +159,6 @@ describe('PATCH /todos/:id', () => {
       });
   });
 });
-
 describe('GET /users/me', () => {
   it('should eturn user if authenticated', done => {
     request(app)
@@ -186,7 +181,6 @@ describe('GET /users/me', () => {
       .end(done);
   });
 });
-
 describe('POST /users', () => {
   it('should create a user', done => {
     var email = 'example@email.com';
@@ -208,7 +202,7 @@ describe('POST /users', () => {
           expect(user).toExist();
           expect(user.password).toNotBe(password);
           done();
-        })
+        }).catch(e => done(e));
       });
   });
   it('should return validation errors if request is invalid', done => {
@@ -231,5 +225,46 @@ describe('POST /users', () => {
       .end(done);
 
 
+  });
+});
+describe('POST /users/login', () => {
+  it('should login user and return auth token', done => {
+    const {email, password, _id} = users[1];
+    request(app).
+    post('/users/login')
+    .send({email, password})
+    .expect(200)
+    .expect(res => {
+      expect(res.headers['x-auth']).toExist();
+    })
+    .end((err, res) => {
+      if (err) return done(err);
+
+      user.findById(_id).then(user => {
+        expect(user.tokens[0]).toInclude({
+          access: 'auth',
+          token: res.headers['x-auth']
+        });
+        done();
+      }).catch(e => done(e));
+    })
+  });
+  it('should reject invalid login', done => {
+    const {email, password, _id} = users[1];
+    request(app).
+    post('/users/login')
+    .send({email, password: `${password}dffd`})
+    .expect(400)
+    .expect(res => {
+      expect(res.headers['x-auth']).toNotExist();
+    })
+    .end((err, res) => {
+      if (err) return done(err);
+
+      user.findById(_id).then(user => {
+        expect(user.tokens.length).toEqual(0);
+        done();
+      }).catch(e => done(e));
+    })
   });
 });
