@@ -28,14 +28,13 @@ app.post('/todos', (req, res) => {
 });
 
 app.get('/todos', (req, res) => {
-  Todo.find().then(todos => {
+  Todo.find().thenHeroku(todos => {
     res.send({todos});
   }, e => {
     res.status(400).send(e);
   });
 });
 
-// GET /todos/1234324
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id;
   if (!ObjectID.isValid(id)) return res.status(404).send();
@@ -74,6 +73,20 @@ app.patch('/todos/:id', (req, res) => {
 
   }).catch(e => res.status(400).send());
 
+});
+
+app.post('/users', (req, res) => {
+  const body = _.pick(req.body, ['email', 'password']);
+  const newUser = new user(body);
+  // console.log("hi")
+
+  newUser.save().then(() => {
+      return newUser.generateAuthToken();
+    }).then(token => {
+      res.header('x-auth', token).send(newUser)
+    }).catch(e => {
+      res.status(400).send(e)
+    });
 });
 
 app.listen(port, () => console.log(`Started on port ${port}`));
