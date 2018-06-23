@@ -8,6 +8,7 @@ const {ObjectID} = require('mongodb');
 const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./models/todo');
 const {user} = require('./models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 const app = express();
 const port = process.env.PORT;
@@ -28,11 +29,9 @@ app.post('/todos', (req, res) => {
 });
 
 app.get('/todos', (req, res) => {
-  Todo.find().thenHeroku(todos => {
-    res.send({todos});
-  }, e => {
-    res.status(400).send(e);
-  });
+  Todo.find().then(
+    todos => res.send({todos}),
+    e => res.status(400).send(e));
 });
 
 app.get('/todos/:id', (req, res) => {
@@ -78,7 +77,6 @@ app.patch('/todos/:id', (req, res) => {
 app.post('/users', (req, res) => {
   const body = _.pick(req.body, ['email', 'password']);
   const newUser = new user(body);
-  // console.log("hi")
 
   newUser.save().then(() => {
       return newUser.generateAuthToken();
@@ -87,6 +85,11 @@ app.post('/users', (req, res) => {
     }).catch(e => {
       res.status(400).send(e)
     });
+});
+
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 app.listen(port, () => console.log(`Started on port ${port}`));
